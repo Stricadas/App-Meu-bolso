@@ -21,14 +21,19 @@ export default function Cadastro() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleCadastro = () => {
-    if (!email || !password || !confirmPassword) {
+
+  async function handleCadastro () {
+    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
       Alert.alert('Atenção', 'Preencha todos os campos.');
       return;
     }
+
+    if(password.length<6)
+      return Alert.alert('A senha deve conter pelo menos 6 caracteres')
+
     if (password !== confirmPassword) {
       Alert.alert('Erro', 'As senhas não coincidem.');
       return;
