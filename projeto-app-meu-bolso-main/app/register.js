@@ -16,7 +16,7 @@ import { useRouter } from 'expo-router';
 import AppButton from '../src/components/AppButton';
 import AppInput from '../src/components/AppInput';
 import { COLORS, RADIUS } from '../src/constants/theme';
-
+import { signUp } from '../src/services/authService';
 export default function Cadastro() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,11 +35,23 @@ export default function Cadastro() {
       return Alert.alert('A senha deve conter pelo menos 6 caracteres')
 
     if (password !== confirmPassword) {
-      Alert.alert('Erro', 'As senhas não coincidem.');
-      return;
+      return Alert.alert('Erro', 'As senhas não coincidem.');
     }
     Alert.alert('Sucesso', 'Cadastro realizado!');
   };
+
+  try{
+    setLoading (true);
+    const {error} = await signUp(email.trim(), password);
+    if(error) {Alert.alert('Erro no cadastro', error.message)
+      console.log('Erro no cadastro', error.message);
+    return
+    } else {
+      Alert.alert('Sucesso', 'Conta criada com sucesso, faça login para continuar.')
+    }
+  }finally{
+    setLoading(false)
+  }
 
   return (
     <KeyboardAvoidingView
