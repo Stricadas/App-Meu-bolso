@@ -17,6 +17,16 @@ import AppButton from '../src/components/AppButton';
 import AppInput from '../src/components/AppInput';
 import { COLORS, RADIUS } from '../src/constants/theme';
 import { signUp } from '../src/services/authService';
+
+// Alert.alert não aparece na web, então usamos window.alert lá
+function avisar(titulo, mensagem) {
+  if (Platform.OS === 'web') {
+    window.alert(mensagem ? `${titulo}\n\n${mensagem}` : titulo);
+  } else {
+    Alert.alert(titulo, mensagem);
+  }
+}
+
 export default function Cadastro() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,33 +34,37 @@ export default function Cadastro() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-
-  async function handleCadastro () {
+  async function handleCadastro() {
     if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
-      Alert.alert('Atenção', 'Preencha todos os campos.');
+      avisar('Atenção', 'Preencha todos os campos.');
       return;
     }
 
-    if(password.length<6)
-      return Alert.alert('A senha deve conter pelo menos 6 caracteres')
+    if (password.length < 6) {
+      avisar('Atenção', 'A senha deve conter pelo menos 6 caracteres.');
+      return;
+    }
 
     if (password !== confirmPassword) {
-      return Alert.alert('Erro', 'As senhas não coincidem.');
+      avisar('Erro', 'As senhas não coincidem.');
+      return;
     }
-    Alert.alert('Sucesso', 'Cadastro realizado!');
-  };
 
-  try{
-    setLoading (true);
-    const {error} = await signUp(email.trim(), password);
-    if(error) {Alert.alert('Erro no cadastro', error.message)
-      console.log('Erro no cadastro', error.message);
-    return
-    } else {
-      Alert.alert('Sucesso', 'Conta criada com sucesso, faça login para continuar.')
+    try {
+      setLoading(true);
+      const { error } = await signUp(email.trim(), password);
+
+      if (error) {
+        console.log('Erro no cadastro', error.message);
+        avisar('Erro no cadastro', error.message);
+        return;
+      }
+
+      avisar('Sucesso', 'Conta criada com sucesso, faça login para continuar.');
+      router.back();
+    } finally {
+      setLoading(false);
     }
-  }finally{
-    setLoading(false)
   }
 
   return (
@@ -155,7 +169,7 @@ const styles = StyleSheet.create({
     shadowColor: '#18372C', shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.09, shadowRadius: 24, elevation: 5,
   },
-  cardTitle: { color: COLORS.text, fontSize: 20, fontWeight: '850' },
+  cardTitle: { color: COLORS.text, fontSize: 20, fontWeight: '800' },
   cardHint: { color: COLORS.muted, fontSize: 13, marginTop: 4, marginBottom: 20 },
   loginRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
   loginText: { color: COLORS.muted, fontSize: 13.5 },
