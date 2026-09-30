@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
   ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -15,12 +16,44 @@ import { useRouter } from 'expo-router';
 import AppButton from '../src/components/AppButton';
 import AppInput from '../src/components/AppInput';
 import { COLORS, RADIUS } from '../src/constants/theme';
+import { signIn } from '../src/services/authService';
+
+// Alert.alert não aparece na web, então usamos window.alert lá
+function avisar(titulo, mensagem) {
+  if (Platform.OS === 'web') {
+    window.alert(mensagem ? `${titulo}\n\n${mensagem}` : titulo);
+  } else {
+    Alert.alert(titulo, mensagem);
+  }
+}
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  async function handleLogin() {
+    if (!email.trim() || !password.trim()) {
+      avisar('Atenção', 'Informe o e-mail e a senha.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error } = await signIn(email.trim(), password);
+
+      if (error) {
+        console.log('Erro no login', error.message);
+        avisar('Erro', error.message);
+        return;
+      }
+
+      router.replace('/home');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <KeyboardAvoidingView
@@ -76,7 +109,8 @@ export default function Login() {
             <Text style={styles.forgotText}>Esqueceu sua senha?</Text>
           </TouchableOpacity>
 
-          <AppButton title="Entrar" loading={loading} />
+          <AppButton title="Entrar" loading={loading} 
+          onPress={handleLogin}/>
         </View>
 
         <View style={styles.signupRow}>

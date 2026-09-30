@@ -7,3 +7,8 @@ export const signUp = async (email, password) => {
     });
     return {data, error};
 }
+
+export const signIn=(email,password)=>
+    supabase.auth.signInWithPassword({
+        email, password
+    })
